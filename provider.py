@@ -18,7 +18,9 @@ def contactsListFromProvider(provider):
     for f in friends:
         fields = {}
         for k,v in f.iteritems():
-            fields[k] = v
+            for mk,mv in provider.contactMapping.iteritems():
+                if mv == k:
+                    fields[mk] = v
         c = Contact(**fields)
         contacts.append(c)
     return contacts
