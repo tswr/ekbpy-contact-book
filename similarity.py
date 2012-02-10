@@ -18,39 +18,57 @@ def areMergeable(contact1, contact2):
                     "vkontakte",
                     "facebook",
                     "twitter",
-                    "moikrug"]
+                    "moikrug",
+                    "familyName"]
     # Лениво делать, когда-нибудь потом
     sameAsGroups = [["name",
                      "additionalName",
                      "familyName"]]
     maybeFields = ["nickname",
                    "familyName"]
+
+    def isFieldsEqual(x,y):
+        """ Определяет эквивалентность полей """
+        x_translit, y_translit = map(translit.fromRussian, (x, y))
+        return (x_translit == y_translit) and x and y
+
     def isFieldsMergable(x,y):
         """ Определяет возможно ли мержить поля автоматически"""
-        return (not x) or (not y) or (x == y)
+        x_translit, y_translit = map(translit.fromRussian, (x, y))
+        return (not x) or (not y) or (x_translit == y_translit)
 
     def isFieldsSeemsMergable(x,y):
         """ Определяет, что поля возможно похожи """
-        return x == y or distance.levenshtein(x,y) < 3
-        
-    fullSimiliarity    = False
-    partialSimiliarity = False
-    for field in sameAsFields:
-        fullSimiliarity = \
-            fullSimiliarity or isFieldsMergable(
-                contact1.__dict__[field],
-                contact2.__dict__[field])
-        
-    for field in contact1.fieldNames:
-        if field in maybeFields:
-            partialSimiliarity =\
-                partialSimiliarity or isFieldsSeemsMergable(
+        return x and (x == y or distance.levenshtein(x,y) <= 3)
+
+    def checkFields(fieldSet, checker, init):
+        """ Осуществляет проверку набора полей fieldSet чекером checker. """
+        out = init
+        for field in fieldSet:
+            out = checker(out, (
                     contact1.__dict__[field],
-                    contact2.__dict__[field])
-        fullSimiliarity = \
-            fullSimiliarity and isFieldsMergable(
-                contact1.__dict__[field],
-                contact2.__dict__[field])
+                    contact2.__dict__[field]))
+        return out
+    
+    fullSimiliarity = checkFields(
+        sameAsFields,
+        # Схожесть должна проявляться хотя бы в одном поле
+        # из заданного набора
+        lambda out, (x,y): out or isFieldsEqual(x,y),
+        False)
+
+    fullSimiliarity = checkFields(
+        contact1.fieldNames,
+        # Сращиваемыми должны быть все поля
+        lambda out, (x,y): out and isFieldsMergable(x,y),
+        fullSimiliarity)
+
+    partialSimiliarity = checkFields(
+        # Похожесть должна наблюдаться хотя бы в одном поле из
+        # заданного набора
+        maybeFields,
+        lambda out, (x,y): out or isFieldsSeemsMergable(x,y),
+        False) 
             
     if fullSimiliarity:
         return 2
@@ -104,11 +122,6 @@ class SimilarityTestCase(unittest.TestCase):
     def test_areMergeable_8(self):
         c1 = Contact.Contact(familyName="Asdf")
         c2 = Contact.Contact(familyName="Asdffff")
-        self.assertEqual(areMergeable(c1, c2), 1)
-
-    def test_areMergeable_9(self):
-        c1 = Contact.Contact(name="Dmitri", familyName=u"Корнев")
-        c2 = Contact.Contact(name=u"Дмитрий", familyName="Kornev")
         self.assertEqual(areMergeable(c1, c2), 1)
 
     def test_areMergeable_9(self):
