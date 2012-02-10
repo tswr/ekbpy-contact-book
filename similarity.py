@@ -46,7 +46,9 @@ def areMergeable(contact1, contact2):
 
     ANY, ALL = 1, 2
     def checkFields(fieldSet, checker, unionType):
-        """ Осуществляет проверку набора полей fieldSet чекером checker. """
+        """ Осуществляет проверку набора полей fieldSet чекером checker.
+            Результаты проверки полей объединяются по отношению unionType.
+            В этой функции ещё есть куда стремиться. """
         if unionType == ANY:
             out = False
         elif unionType == ALL:
@@ -60,15 +62,17 @@ def areMergeable(contact1, contact2):
             if unionType == ALL:
                 out = out and checker(x,y)
         return out
+
+    allFields = contact1.fieldNames
     
     # Схожесть должна проявляться хотя бы в одном поле из заданного набора
-    canAutomatic        = checkFields(sameAsFields,        isFieldsEqual,         ANY)
+    canAutomatic        = checkFields(sameAsFields, isFieldsEqual,         ANY)
 
     # Сращиваемыми должны быть все поля
-    fullSimiliarity     = checkFields(contact1.fieldNames, isFieldsMergable,      ALL)
+    fullSimiliarity     = checkFields(allFields,    isFieldsMergable,      ALL)
     
     # Похожесть должна наблюдаться хотя бы в одном поле из заданного набора
-    partialSimiliarity = checkFields(maybeFields,      isFieldsSeemsMergable,     ANY)  
+    partialSimiliarity  = checkFields(maybeFields,  isFieldsSeemsMergable, ANY)  
             
     if fullSimiliarity and canAutomatic:
         return 2
