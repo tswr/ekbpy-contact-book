@@ -9,10 +9,16 @@ from modules.importMoiKrug import MoiKrug
 
 def contactsListFromProvider(provider):
     """
-    Функция зовет у провайдера метод getFriends() и используя статическую переменную contactMapping из класса провайдера
+    Функция зовет у провайдера метод getFriends() и 
+    используя статическую переменную contactMapping из класса провайдера
     делает из списка словарей список контактов.
     """
-    raise NotImplementedError
+    friends = provider.getFriends()
+    contacts = []
+    for f in friends:
+        c = Contact(**f)
+        contacts.append(c)
+    return contacts
 
 def importFromGoogleCSV(fileName):
     return contactsListFromProvider(Google(fileName))
