@@ -1,6 +1,6 @@
 #-*- coding:utf-8 -*-
 
-def fromRussian(string):
+def fromRussian(input):
     """
     Транслитерирует символы русских букв. Остальные символы оставляет неизмененными.
     """
@@ -41,7 +41,14 @@ def fromRussian(string):
         u" " : " "
     }
 
-    raise NotImplementedError
+    result = ""
+    for letter in input:
+        if letter in translationTable :
+            result += translationTable[unicode(letter)]
+        else :
+            result += letter
+    return result
+
 
 ##############
 # unit tests #

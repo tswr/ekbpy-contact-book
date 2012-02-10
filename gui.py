@@ -132,7 +132,16 @@ class MainWidget(QtGui.QMainWindow):
         self.rebuild_contact_list()
             
     def thunderbirdcsv_button_presed(self):
-        raise NotImplementedError
+        filename=QtGui.QFileDialog.getOpenFileName(self,"Open Image", "", "All files (*)")
+        if not filename:
+            return
+        
+        contacts=provider.importFromThunderbirdCSV(filename)
+        
+        for contact in contacts:
+            self.contact_storage.insert(contact)
+        self.rebuild_contact_list()
+
 
     def vkontakte_button_presed(self):
         provider.importFromVKontakte_authorize()
