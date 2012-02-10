@@ -55,7 +55,14 @@ class ContactStorage(object):
         return contact._id
 
     def drop_contact_by_id(self, contact):
-	raise NotImplementedError
+        if contact >= len(self._contacts):
+            raise ContactNotFound("Contact with id {0} is not exists".format(contact))
+        
+        del(self._contacts[contact])
+        
+        for cont in self._contacts:
+            if cont._id > id:
+                cont._id -= 1
 
     def drop(self, contact):
         if contact._id is None:
