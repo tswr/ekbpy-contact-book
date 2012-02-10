@@ -11,7 +11,47 @@ def areMergeable(contact1, contact2):
     Возвращает 1, если нужно предложить объединение пользователю
     Возвращает 2, если можно объединить в автоматическом режиме
     """
-    raise NotImplementedError
+    sameAsFields = ["email",
+                    "phone",
+                    "icq",
+                    "skype",
+                    "vkontakte",
+                    "facebook",
+                    "twitter",
+                    "moikrug"]
+    # Лениво делать, когда-нибудь потом
+    sameAsGroups = [["name",
+                     "additionalName",
+                     "familyName"]]
+    maybeFields = ["nickname",
+                   "familyName"]
+    def isFieldsMergable(x,y):
+        """ Определяет возможно ли мержить поля автоматически"""
+        return x == None or y == None or x == y
+
+    def isFieldsSeemsMergable(x,y):
+        """ Определяет, что поля возможно похожи """
+        return x == y or distance.levenshtein(x,Y) < 3
+        
+    fullSimiliarity    = True
+    partialSimiliarity = False
+    for field in contact1.fieldNames:
+        if field in maybeFields:
+            partialSimiliarity =\
+                partialSimiliarity or isFieldsSeemsMergable(
+                    contact1.__dict__[field],
+                    contact2.__dict__[field])
+        if field in sameAsFields:
+            fullSimiliarity = \
+                fullSimiliarity and IsFieldsMergable(
+                    contact1.__dict__[field],
+                    contact2.__dict__[field])
+            
+    if fullSimiliarity:
+        return 2
+    if partialSimiliarity:
+        return 1
+    return 0
 
 ##############
 # unit tests #
