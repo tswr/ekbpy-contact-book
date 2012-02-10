@@ -27,25 +27,30 @@ def areMergeable(contact1, contact2):
                    "familyName"]
     def isFieldsMergable(x,y):
         """ Определяет возможно ли мержить поля автоматически"""
-        return x == None or y == None or x == y
+        return (not x) or (not y) or (x == y)
 
     def isFieldsSeemsMergable(x,y):
         """ Определяет, что поля возможно похожи """
-        return x == y or distance.levenshtein(x,Y) < 3
+        return x == y or distance.levenshtein(x,y) < 3
         
-    fullSimiliarity    = True
+    fullSimiliarity    = False
     partialSimiliarity = False
+    for field in sameAsFields:
+        fullSimiliarity = \
+            fullSimiliarity or isFieldsMergable(
+                contact1.__dict__[field],
+                contact2.__dict__[field])
+        
     for field in contact1.fieldNames:
         if field in maybeFields:
             partialSimiliarity =\
                 partialSimiliarity or isFieldsSeemsMergable(
                     contact1.__dict__[field],
                     contact2.__dict__[field])
-        if field in sameAsFields:
-            fullSimiliarity = \
-                fullSimiliarity and IsFieldsMergable(
-                    contact1.__dict__[field],
-                    contact2.__dict__[field])
+        fullSimiliarity = \
+            fullSimiliarity and isFieldsMergable(
+                contact1.__dict__[field],
+                contact2.__dict__[field])
             
     if fullSimiliarity:
         return 2
