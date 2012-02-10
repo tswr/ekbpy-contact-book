@@ -54,6 +54,13 @@ class MainWidget(QtGui.QMainWindow):
         self.btn5.setGeometry(805, 440,100,50)
         self.btn5.pressed.connect(self.moikrug_button_presed)
         
+        self.search_field = QtGui.QLineEdit(self)
+        self.search_field.setGeometry(205, 410, 200, 25)
+        
+        self.search_btn = QtGui.QPushButton(u"Искать", self)
+        self.search_btn.setGeometry(405, 410,100,25)
+        self.search_btn.pressed.connect(self.search_button_presed)
+        
         #self.merge_checkbox.setChecked(True)
         self.merge_checkbox.stateChanged.connect(self.rebuild_contact_list)
         
@@ -161,6 +168,10 @@ class MainWidget(QtGui.QMainWindow):
     
     def moikrug_button_presed(self):
         raise NotImplementedError
+    
+    def search_button_presed(self):
+        self.contact_storage = self.contact_storage.search(self.search_field)
+        self.rebuild_contact_list()
         
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
