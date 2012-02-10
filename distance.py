@@ -4,7 +4,23 @@ def levenshtein(s1, s2):
     """
     Вычисляет расстояние Левенштейна для двух заданных строк.
     """
-    raise NotImplementedError
+    if s1 == s2:
+        return 0
+    slen, dlen = len(s1), len(s2)
+    dist = [[0 for i in range(dlen+1)] for x in range(slen+1)]
+    for i in xrange(slen+1):
+        dist[i][0] = i
+    for j in xrange(dlen+1):
+        dist[0][j] = j
+    for i in xrange(slen):
+        for j in xrange(dlen):
+            cost = 0 if s1[i] == s2[j] else 1
+            dist[i+1][j+1] = min(
+                dist[i][j+1] + 1,
+                dist[i+1][j] + 1,
+                dist[i][j] + cost
+            )
+    return dist[-1][-1]
 
 ##############
 # unit tests #
