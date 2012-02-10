@@ -18,6 +18,8 @@ class VKontakte(Parser):
     """
     appId = 2795678
     redirectURI = "http://oauth.vkontakte.ru/blank.html"
+    
+    
 
     contactMapping = {
         "name" : "first_name",
@@ -45,7 +47,14 @@ class VKontakte(Parser):
         access_token=099ec13146323349098727e156092dc47e0090709076ce24a936f3b7e347bb5&expires_in=86400&user_id=10071505
         которую пользователь копирует из браузера после завершения авторизации в VKontakte.
         """
-        raise NotImplementedError
+        
+        auth_mapping = {'user_id': 'userId', 'expires_in': 'expires_in', 'access_token': 'accessToken'}
+        raw_parameters = authorizationResponse.split('&')
+        for line in raw_parameters:
+            parameter = line.split('=')
+            setattr(self, auth_mapping[parameter[0]], parameter[1])
+
+#        raise NotImplementedError
 
     @staticmethod
     def authorize():
@@ -55,7 +64,8 @@ class VKontakte(Parser):
         settings = "friends"
         display = "popup"
         requestURI = "http://oauth.vkontakte.ru/authorize?client_id={0}&scope={1}&redirect_uri={2}&display={3}&response_type=token".format(VKontakte.appId, settings, VKontakte.redirectURI, display)
-        raise NotImplementedError
+        VKontakte.browser = webbrowser.open_new(requestURI)
+#        raise NotImplementedError
 
     @staticmethod
     def callAPI(method, params, accessToken):
@@ -63,15 +73,18 @@ class VKontakte(Parser):
         Используется для вызова api функций. Возвращает json, преобразованный в объектное представление.
         """
         targetURI = "https://api.vkontakte.ru/method/{0}?{1}&access_token={2}".format(method, params, accessToken)
-        raise NotImplementedError
+        return urllib2.urlopen(urllib2.Request(targetURI)).read()
+#        raise NotImplementedError
 
     def getFriends(self):
         """
         Возвращает список словарей пользователей.
         """
         #fields = "uid,first_name,last_name,nickname,sex,bdate,city,country,timezone,photo,photo_medium,photo_big,domain,has_mobile,rate,contacts,education"
+        
         fieldsList = ["uid", "first_name", "last_name", "nickname", "sex", "bdate", "contacts", "mobile_phone"]
         name_case = "nom"
-        params = "uid={0}&fields={1}&name_case={2}".format(self.userId, fields, name_case)
+        params = "uid={0}&fields={1}&name_case={2}".format(self.userId, ','.join(fieldsList), name_case)
         o = VKontakte.callAPI("getFriends", params, self.accessToken)
-        raise NotImplementedError
+        return json.loads(o)['response']
+#        raise NotImplementedError

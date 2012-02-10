@@ -12,7 +12,7 @@ def contactsListFromProvider(provider):
     Функция зовет у провайдера метод getFriends() и используя статическую переменную contactMapping из класса провайдера
     делает из списка словарей список контактов.
     """
-    raise NotImplementedError
+    return provider.getFriends()
 
 def importFromGoogleCSV(fileName):
     return contactsListFromProvider(Google(fileName))
