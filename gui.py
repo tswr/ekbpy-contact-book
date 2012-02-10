@@ -110,8 +110,8 @@ class MainWidget(QtGui.QMainWindow):
                     othertext=contact_other.__dict__[fieldname]
                     if text !=othertext:
                         text+=" | " + contact_other.__dict__[fieldname]
-                
-                self.contact_list.setItem(contact_num,fieldnum,QtGui.QTableWidgetItem(text))
+                if text:
+                    self.contact_list.setItem(contact_num,fieldnum,QtGui.QTableWidgetItem(text))
         
         self.contact_list.resizeColumnsToContents()
 
@@ -160,7 +160,18 @@ class MainWidget(QtGui.QMainWindow):
         raise NotImplementedError
     
     def moikrug_button_presed(self):
-        raise NotImplementedError
+        provider.importFromMoiKrug_authorize();
+
+        authorizationCode, ok = QtGui.QInputDialog.getText(self, 'Moi krug authorization', 'Enter auth code:')
+        if not ok:
+            return
+
+        contacts = provider.importFromMoiKrug(str(authorizationCode))
+        for contact in contacts:
+            self.contact_storage.insert(contact)
+        self.rebuild_contact_list()
+
+
         
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)

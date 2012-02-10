@@ -47,4 +47,4 @@ def importFromMoiKrug_authorize():
     MoiKrug.authorize()
 
 def importFromMoiKrug(authorizationCode):
-    return contactsListFromProvider(MoiKrug(authorizationResponse))
+    return contactsListFromProvider(MoiKrug(authorizationCode))
