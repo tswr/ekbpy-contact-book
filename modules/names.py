@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import re
+
+gp_find = re.compile(r'\w+', re.LOCALE)
+
 def splitString(string):
     """
     Используется для выделения имени и фамилии из данной строки.
