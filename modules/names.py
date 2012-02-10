@@ -6,7 +6,11 @@ def splitString(string):
     Отбрасываются лишние пробелы, берутся первое и последнее слова в строке.
     На выходе tuple из двух строк: имени и фамилии.
     """
-    raise NotImplementedError
+    list = string.split()
+    llen = len(list)
+    first = list[0] if llen > 0 else ''
+    last = list[llen - 1] if llen > 1 else ''
+    return (first, last)
 
 ##############
 # unit tests #
