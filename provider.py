@@ -16,7 +16,10 @@ def contactsListFromProvider(provider):
     friends = provider.getFriends()
     contacts = []
     for f in friends:
-        c = Contact(**f)
+        fields = {}
+        for k,v in f.iteritems():
+            fields[k] = v
+        c = Contact(**fields)
         contacts.append(c)
     return contacts
 
