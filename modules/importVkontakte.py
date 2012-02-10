@@ -34,7 +34,7 @@ class VKontakte(Parser):
         "organization" : None,
         "website" : None,
         "skype" : None,
-        "vkontakte" : "uid",
+        "vkontakte" : "link",
         "icq" : None,
         "facebook" : None,
         "twitter" : None,
@@ -81,10 +81,13 @@ class VKontakte(Parser):
         Возвращает список словарей пользователей.
         """
         #fields = "uid,first_name,last_name,nickname,sex,bdate,city,country,timezone,photo,photo_medium,photo_big,domain,has_mobile,rate,contacts,education"
-        
-        fieldsList = ["uid", "first_name", "last_name", "nickname", "sex", "bdate", "contacts", "mobile_phone"]
+
+        fieldsList = ["uid", "first_name", "last_name", "nickname", "sex", "bdate", "contacts", "mobile_phone", "screen_name"]
         name_case = "nom"
         params = "uid={0}&fields={1}&name_case={2}".format(self.userId, ','.join(fieldsList), name_case)
         o = VKontakte.callAPI("getFriends", params, self.accessToken)
-        return json.loads(o)['response']
-#        raise NotImplementedError
+        friends = json.loads(o)['response']
+        for f in friends:
+            if f.has_key('screen_name'):
+                f['link'] = "http://vk.vom/" + f['screen_name']
+        return friends
