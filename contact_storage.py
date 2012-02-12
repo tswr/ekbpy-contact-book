@@ -151,3 +151,6 @@ class ContactStorage(object):
     def xget_merged_with(self, contact):
         for contact_id in self.get_merged_with_ids(contact):
             yield self.get_contact(contact_id)
+            
+    def search_by_name(self, search_line):
+        return filter(lambda x : x.filter_by_name(search_line), self._contacts)
