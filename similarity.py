@@ -4,6 +4,9 @@ import Contact
 import distance
 import translit
 
+class InvalidRelation(Exception):
+    pass
+
 def areMergeable(contact1, contact2):
     """
     Определяет, нужно ли объединить два контакта.
@@ -41,36 +44,37 @@ def areMergeable(contact1, contact2):
         """ Определяет, что поля возможно похожи """
         return x and (x == y or distance.levenshtein(x,y) <= 3)
 
-    def checkFields(fieldSet, checker, init):
-        """ Осуществляет проверку набора полей fieldSet чекером checker. """
-        out = init
+    ANY, ALL = 1, 2
+    def checkFields(fieldSet, checker, unionType):
+        """ Осуществляет проверку набора полей fieldSet чекером checker.
+            Результаты проверки полей объединяются по отношению unionType.
+            В этой функции ещё есть куда стремиться. """
+        if unionType == ANY:
+            out = False
+        elif unionType == ALL:
+            out = True
+        else:
+            raise InvalidRelation()
         for field in fieldSet:
-            out = checker(out, (
-                    contact1.__dict__[field],
-                    contact2.__dict__[field]))
+            x,y = contact1.__dict__[field], contact2.__dict__[field]
+            if unionType == ANY:
+                out = out or checker(x,y)
+            if unionType == ALL:
+                out = out and checker(x,y)
         return out
+
+    allFields = contact1.fieldNames
     
-    fullSimiliarity = checkFields(
-        sameAsFields,
-        # Схожесть должна проявляться хотя бы в одном поле
-        # из заданного набора
-        lambda out, (x,y): out or isFieldsEqual(x,y),
-        False)
+    # Схожесть должна проявляться хотя бы в одном поле из заданного набора
+    canAutomatic        = checkFields(sameAsFields, isFieldsEqual,         ANY)
 
-    fullSimiliarity = checkFields(
-        contact1.fieldNames,
-        # Сращиваемыми должны быть все поля
-        lambda out, (x,y): out and isFieldsMergable(x,y),
-        fullSimiliarity)
-
-    partialSimiliarity = checkFields(
-        # Похожесть должна наблюдаться хотя бы в одном поле из
-        # заданного набора
-        maybeFields,
-        lambda out, (x,y): out or isFieldsSeemsMergable(x,y),
-        False) 
+    # Сращиваемыми должны быть все поля
+    fullSimiliarity     = checkFields(allFields,    isFieldsMergable,      ALL)
+    
+    # Похожесть должна наблюдаться хотя бы в одном поле из заданного набора
+    partialSimiliarity  = checkFields(maybeFields,  isFieldsSeemsMergable, ANY)  
             
-    if fullSimiliarity:
+    if fullSimiliarity and canAutomatic:
         return 2
     if partialSimiliarity:
         return 1
