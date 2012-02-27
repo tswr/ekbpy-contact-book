@@ -4,9 +4,6 @@ import Contact
 import distance
 import translit
 
-class InvalidRelation(Exception):
-    pass
-
 def areMergeable(contact1, contact2):
     """
     Определяет, нужно ли объединить два контакта.
@@ -14,70 +11,32 @@ def areMergeable(contact1, contact2):
     Возвращает 1, если нужно предложить объединение пользователю
     Возвращает 2, если можно объединить в автоматическом режиме
     """
-    sameAsFields = ["email",
-                    "phone",
-                    "icq",
-                    "skype",
-                    "vkontakte",
-                    "facebook",
-                    "twitter",
-                    "moikrug",
-                    "familyName"]
-    # Лениво делать, когда-нибудь потом
-    sameAsGroups = [["name",
-                     "additionalName",
-                     "familyName"]]
-    maybeFields = ["nickname",
-                   "familyName"]
+    shouldMergeIfEqual = [ "email", "phone", "vkontakte", "icq", "facebook", "twitter", "moikrug"]
+    for field in shouldMergeIfEqual:
+        if contact1.__dict__[field] == contact2.__dict__[field] != "":
+            return 2
 
-    def isFieldsEqual(x,y):
-        """ Определяет эквивалентность полей """
-        x_translit, y_translit = map(translit.fromRussian, (x, y))
-        return (x_translit == y_translit) and x and y
-
-    def isFieldsMergable(x,y):
-        """ Определяет возможно ли мержить поля автоматически"""
-        x_translit, y_translit = map(translit.fromRussian, (x, y))
-        return (not x) or (not y) or (x_translit == y_translit)
-
-    def isFieldsSeemsMergable(x,y):
-        """ Определяет, что поля возможно похожи """
-        return x and (x == y or distance.levenshtein(x,y) <= 3)
-
-    ANY, ALL = 1, 2
-    def checkFields(fieldSet, checker, unionType):
-        """ Осуществляет проверку набора полей fieldSet чекером checker.
-            Результаты проверки полей объединяются по отношению unionType.
-            В этой функции ещё есть куда стремиться. """
-        if unionType == ANY:
-            out = False
-        elif unionType == ALL:
-            out = True
-        else:
-            raise InvalidRelation()
-        for field in fieldSet:
-            x,y = contact1.__dict__[field], contact2.__dict__[field]
-            if unionType == ANY:
-                out = out or checker(x,y)
-            if unionType == ALL:
-                out = out and checker(x,y)
-        return out
-
-    allFields = contact1.fieldNames
-    
-    # Схожесть должна проявляться хотя бы в одном поле из заданного набора
-    canAutomatic        = checkFields(sameAsFields, isFieldsEqual,         ANY)
-
-    # Сращиваемыми должны быть все поля
-    fullSimiliarity     = checkFields(allFields,    isFieldsMergable,      ALL)
-    
-    # Похожесть должна наблюдаться хотя бы в одном поле из заданного набора
-    partialSimiliarity  = checkFields(maybeFields,  isFieldsSeemsMergable, ANY)  
-            
-    if fullSimiliarity and canAutomatic:
+    if contact1.name == contact2.name and contact1.familyName == contact2.familyName != "":
         return 2
-    if partialSimiliarity:
+
+    if distance.levenshtein(contact1.name, contact2.name) <= 3 \
+       and distance.levenshtein(contact1.familyName, contact2.familyName) <= 3 \
+       and contact1.familyName != "" and contact2.familyName != "":
         return 1
+    
+    name1 = translit.fromRussian(contact1.name)
+    name2 = translit.fromRussian(contact2.name)
+    familyName1 = translit.fromRussian(contact1.familyName)
+    familyName2 = translit.fromRussian(contact2.familyName)
+
+    if name1 == name2 and familyName1 == familyName2 != "":
+        return 2
+
+    if distance.levenshtein(name1, name2) <= 3 \
+       and distance.levenshtein(familyName1, familyName2) <= 3 \
+       and familyName2 != "" and familyName2 != "":
+        return 1
+
     return 0
 
 ##############
@@ -126,6 +85,11 @@ class SimilarityTestCase(unittest.TestCase):
     def test_areMergeable_8(self):
         c1 = Contact.Contact(familyName="Asdf")
         c2 = Contact.Contact(familyName="Asdffff")
+        self.assertEqual(areMergeable(c1, c2), 1)
+
+    def test_areMergeable_9(self):
+        c1 = Contact.Contact(name="Dmitri", familyName=u"Корнев")
+        c2 = Contact.Contact(name=u"Дмитрий", familyName="Kornev")
         self.assertEqual(areMergeable(c1, c2), 1)
 
     def test_areMergeable_9(self):

@@ -7,38 +7,18 @@ def validate(phoneString):
     Проверяет, является ли переданная строка телефоном в формате +12345678901.
     Возвращает True, если является, False иначе.
     """
-    
-    if phoneString[0]=='+':
-		b=phoneString[1:]
-		if len(b) <> 11:
-			return False
-		for s in b:
-			if int(s) not in [1,2,3,4,5,6,7,8,9,0]:
-				return False
-		return True
-    else:
-		return False
-#    raise NotImplementedError
+    #return len(phoneString) == 12 and re.search(r'^\+[0-9]{11}$', phoneString) is not None
+    return re.search(r'^\+[0-9]{11}$', phoneString) is not None
 
 def makePretty(phoneString):
     """
     Извлекает из произвольной строки телефон и возвращает его в формате, удовлетворяющем validate.
     """
-    phone=''
-    for s in xrange(0,len(phoneString)):
-		if phoneString[s]  in ['+','1','2','3','4','5','6','7','8','9','0']:
-			phone=phone+phoneString[s]
-    if len(phone)==0:
-		return ''
-    if len(phone)==10:
-		phone='+7'+phone
-    if phone[0] == '8':
-		phone='+7'+phone[1:]
-    if not validate(phone):
-		phone=''		
-    return phone
-			
-
+    phone = re.sub(r"[^+0-9]", "", phoneString)
+    if len(phone) == 10:
+        phone = "+7" + phone
+    phone = re.sub(r"^8", "+7", phone)
+    return phone if validate(phone) else ""
 
 ##############
 # unit tests #

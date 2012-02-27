@@ -35,15 +35,3 @@ class Contact(object):
         return str({field:self.__dict__[field]
                         for field in self.fieldNames
                                 if self.__dict__[field]})
-        
-    def _name_icontains(self, pattern):
-        return self.name.upper().__contains__(pattern.upper())
-    
-    def _familyname_icontains(self, pattern):
-        return self.familyName.upper().__contains__(pattern.upper())
-    
-    def _additionalname_icontains(self, pattern):
-        return self.additionalName.upper().__contains__(pattern.upper())
-    
-    def filter_by_name(self, pattern=""):
-        return self._name_icontains(pattern) or self._familyname_icontains(pattern) or self._additionalname_icontains(pattern)

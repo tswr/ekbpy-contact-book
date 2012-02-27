@@ -31,10 +31,17 @@ class Google(Parser):
         """
         csvFileName - имя файла, из которого необходимо произвести импорт
         """
-        raise NotImplementedError
+        self.csvFileName = csvFileName
 
     def getFriends(self):
         """
         Возвращает список словарей пользователей.
         """
-        raise NotImplementedError
+        contacts = []
+        with codecs.open(self.csvFileName, encoding='utf-16') as f:
+            contacts = self.CSVParse(f)
+        return contacts
+
+if __name__ == "__main__":
+    pass
+    #print (Google("google.csv").getFriends())

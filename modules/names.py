@@ -1,20 +1,18 @@
 # -*- coding: utf-8 -*-
 
-import re
-
-gp_find = re.compile(r'\w+', re.LOCALE)
-
 def splitString(string):
     """
     Используется для выделения имени и фамилии из данной строки.
     Отбрасываются лишние пробелы, берутся первое и последнее слова в строке.
     На выходе tuple из двух строк: имени и фамилии.
     """
-    list = string.split()
-    llen = len(list)
-    first = list[0] if llen > 0 else ''
-    last = list[llen - 1] if llen > 1 else ''
-    return (first, last)
+    a = string.strip().split()
+    if len(a) >= 2:
+        return a[0], a[-1]
+    if len(a) == 1:
+        return a[0], ""
+    else:
+        return "", ""
 
 ##############
 # unit tests #

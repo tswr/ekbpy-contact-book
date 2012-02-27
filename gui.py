@@ -54,13 +54,6 @@ class MainWidget(QtGui.QMainWindow):
         self.btn5.setGeometry(805, 440,100,50)
         self.btn5.pressed.connect(self.moikrug_button_presed)
         
-        self.search_field = QtGui.QLineEdit(self)
-        self.search_field.setGeometry(205, 410, 200, 25)
-        
-        self.search_btn = QtGui.QPushButton(u"Искать", self)
-        self.search_btn.setGeometry(405, 410,100,25)
-        self.search_btn.pressed.connect(self.search_button_presed)
-        
         #self.merge_checkbox.setChecked(True)
         self.merge_checkbox.stateChanged.connect(self.rebuild_contact_list)
         
@@ -117,8 +110,8 @@ class MainWidget(QtGui.QMainWindow):
                     othertext=contact_other.__dict__[fieldname]
                     if text !=othertext:
                         text+=" | " + contact_other.__dict__[fieldname]
-                if text:
-                    self.contact_list.setItem(contact_num,fieldnum,QtGui.QTableWidgetItem(text))
+                
+                self.contact_list.setItem(contact_num,fieldnum,QtGui.QTableWidgetItem(text))
         
         self.contact_list.resizeColumnsToContents()
 
@@ -142,13 +135,12 @@ class MainWidget(QtGui.QMainWindow):
         filename=QtGui.QFileDialog.getOpenFileName(self,"Open Image", "", "All files (*)")
         if not filename:
             return
-        
+
         contacts=provider.importFromThunderbirdCSV(filename)
-        
+            
         for contact in contacts:
             self.contact_storage.insert(contact)
         self.rebuild_contact_list()
-
 
     def vkontakte_button_presed(self):
         provider.importFromVKontakte_authorize()
@@ -162,25 +154,25 @@ class MainWidget(QtGui.QMainWindow):
         for contact in contacts:
             self.contact_storage.insert(contact)
         self.rebuild_contact_list()
+            
+            
     
     def facebook_button_presed(self):
-        raise NotImplementedError
-    
-    def moikrug_button_presed(self):
-        provider.importFromMoiKrug_authorize();
-
-        authorizationCode, ok = QtGui.QInputDialog.getText(self, 'Moi krug authorization', 'Enter auth code:')
+        provider.importFromVKontakte_authorize()
+        text, ok = QtGui.QInputDialog.getText(self, 'Input Dialog', 
+            'Enter the response of vk.com after your authorization: ')
+            
         if not ok:
             return
-
-        contacts = provider.importFromMoiKrug(str(authorizationCode))
+            
+        contacts=provider.importFromVKontakte(str(text))
         for contact in contacts:
             self.contact_storage.insert(contact)
         self.rebuild_contact_list()
-
-    def search_button_presed(self):
-        self.contact_storage = self.contact_storage.search(self.search_field)
-        self.rebuild_contact_list()
+    
+    def moikrug_button_presed(self):
+        print "pressed 5"
+        
         
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)

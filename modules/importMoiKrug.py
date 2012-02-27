@@ -17,6 +17,7 @@ class MoiKrug(Parser):
     client_id = "aff62db3ea564801972eb9131d77dafd"
     client_secret = "1d9a4f61dea445d2bbe3cc75c143e9b6"
 
+    type_name_for_people = "Мой круг"
     contactMapping = {
         "name" : "name1",
         "additionalName" : None,
@@ -42,12 +43,11 @@ class MoiKrug(Parser):
         authorizationCode - код авторизации, который был показан пользователю в браузере.
         """
         dataString = "grant_type=authorization_code&code={0}&client_id={1}&client_secret={2}".format(authorizationCode, MoiKrug.client_id, MoiKrug.client_secret)
-        r = urllib2.urlopen("https://oauth.yandex.ru/token", dataString)
-        if r.getcode() != 200:
-            raise Exception("HTTP code " + r.getcode() + " " + r.readlines())
-        ans = r.readlines()[0]
-        self.access_token = json.loads(ans)['access_token']
-
+        mk = urllib2.urlopen("https://oauth.yandex.ru/token", dataString)
+        response = mk.read()
+        o = json.loads(response)
+        self.access_token = o["access_token"]
+        #print self.access_token
 
     @staticmethod
     def authorize():
@@ -58,34 +58,35 @@ class MoiKrug(Parser):
         response_type = "code"
         display = "popup"
         requestURI = "https://oauth.yandex.ru/authorize?response_type={0}&client_id={1}&display={2}".format(response_type, client_id, display)
-        webbrowser.open(requestURI)
-
-    @staticmethod
-    def openFriends(access_token):
-        friendsGetURI = "http://api.moikrug.ru/v1/{0}/?oauth_token={1}&{2}".format("my/friends", access_token, "")
-        return urllib2.urlopen(friendsGetURI)
-
+        #print requestURI
+        webbrowser.open_new(requestURI)
 
     @staticmethod
     def callAPI(method, params, access_token):
         """
         Используется для вызова api функций. Возвращает json, преобразованный в объектное представление.
         """
-
         friendsGetURI = "http://api.moikrug.ru/v1/{0}/?oauth_token={1}&{2}".format(method, access_token, params)
-        r = urllib2.urlopen(friendsGetURI)
-        if r.getcode() != 200:
-            raise Exception("Response code: " + r.getcode() + " " + r.readlines())
-        return json.loads(r.read())
-
+        mk = urllib2.urlopen(friendsGetURI)
+        response = mk.read()
+        return json.loads(response)
 
     def getFriends(self):
         """
         Возвращает список словарей пользователей.
         """
         friendsIds = MoiKrug.callAPI("my/friends", "", self.access_token)
-        idsList = ','.join(friendsIds)
-        friends = MoiKrug.callAPI("person", "ids=" + idsList, self.access_token)
-        for f in friends:
-            f['name2'], f['name1'] = self.splitString(f['name'])
-        return friends
+        ids = ",".join(friendsIds)
+        friendsInfo = MoiKrug.callAPI("person", "ids={0}".format(ids), self.access_token)
+        for friend in friendsInfo:
+            if "name" in friend:
+                friend["name1"], friend["name2"] = self.splitString(friend["name"])
+            if "gender" in friend:
+                pass
+        return friendsInfo
+
+if __name__ == "__main__":
+    MoiKrug.authorize()
+    authorizationCode = raw_input("Enter the response of moikrug.ru after your authorization: ")
+    mk = MoiKrug(authorizationCode)
+    print mk.getFriends()

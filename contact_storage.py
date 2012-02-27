@@ -55,16 +55,8 @@ class ContactStorage(object):
         return contact._id
 
     def drop_contact_by_id(self, contact):
-        if contact >= len(self._contacts):
-            raise ContactNotFound("Contact with id {0} is not exists".format(contact))
-        
-        for merged in self._merges[contact]:
-            was_merged = self._merges[merged]
-            was_merged.remove(contact)
-        
-        self._contacts[contact] = None
-        del self._merges[contact]
-        
+	raise NotImplementedError
+
     def drop(self, contact):
         if contact._id is None:
             raise ContactNotInStorage(contact)
@@ -103,8 +95,8 @@ class ContactStorage(object):
             self.__dict__ = cPickle.load(fn)
     
     def _merge_one_way(self, contact_1_id, contact_2_id):
-    	if contact_1_id == contact_2_id:
-    	    return
+	if contact_1_id == contact_2_id:
+	    return
         self._merges.setdefault(contact_1_id, [])
         if contact_2_id not in self._merges[contact_1_id]:
             self._merges[contact_1_id].append(contact_2_id)
@@ -159,6 +151,3 @@ class ContactStorage(object):
     def xget_merged_with(self, contact):
         for contact_id in self.get_merged_with_ids(contact):
             yield self.get_contact(contact_id)
-            
-    def search_by_name(self, search_line):
-        return filter(lambda x : x.filter_by_name(search_line), self._contacts)

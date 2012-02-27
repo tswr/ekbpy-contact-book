@@ -9,21 +9,22 @@ from modules.importMoiKrug import MoiKrug
 
 def contactsListFromProvider(provider):
     """
-    Функция зовет у провайдера метод getFriends() и 
-    используя статическую переменную contactMapping из класса провайдера
+    Функция зовет у провайдера метод getFriends() и используя статическую переменную contactMapping из класса провайдера
     делает из списка словарей список контактов.
     """
+    cls = provider.__class__
     friends = provider.getFriends()
-    contacts = []
-    for f in friends:
-        fields = {}
-        for k,v in f.iteritems():
-            for mk,mv in provider.contactMapping.iteritems():
-                if mv == k:
-                    fields[mk] = v
-        c = Contact(**fields)
-        contacts.append(c)
-    return contacts
+    contactList = []
+    for friend in friends:
+        dictionary = {}
+        for field in Contact.fieldNames:
+            if field in cls.contactMapping \
+               and cls.contactMapping[field] is not None \
+               and cls.contactMapping[field] in friend:
+                dictionary[field] = friend[cls.contactMapping[field]]
+        newContact = Contact(**dictionary)
+        contactList.append(newContact)
+    return contactList
 
 def importFromGoogleCSV(fileName):
     return contactsListFromProvider(Google(fileName))
@@ -47,4 +48,4 @@ def importFromMoiKrug_authorize():
     MoiKrug.authorize()
 
 def importFromMoiKrug(authorizationCode):
-    return contactsListFromProvider(MoiKrug(authorizationCode))
+    return contactsListFromProvider(MoiKrug(authorizationResponse))

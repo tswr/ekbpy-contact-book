@@ -8,6 +8,7 @@ class Thunderbird(Parser):
     Класс для импорта контактов из локального csv файла, полученного через экспорт первого круга из moikrug в формате
     thunderbird.
     """
+    type_name_for_people = "Thunderbird"
     contactMapping = {
         "name" : "name1",
         "additionalName" : "name2",
@@ -32,10 +33,21 @@ class Thunderbird(Parser):
         """
         csvFileName - имя файла, из которого необходимо произвести импорт
         """
-        raise NotImplementedError
+        self.csvFileName = csvFileName
 
     def getFriends(self):
         """
         Возвращает список словарей пользователей.
         """
-        raise NotImplementedError
+        contacts = []
+        with codecs.open(self.csvFileName, encoding='cp1251') as f:
+            contacts = self.CSVParse(f)
+            for c in contacts:
+                if "Display Name" in c:
+                    c["name1"], c["name2"] = self.splitString(c["Display Name"])
+                if "Mobile Number" in c:
+                    c["Mobile Number"] = self.makePretty(c["Mobile Number"])
+        return contacts
+
+if __name__ == "__main__":
+    print Thunderbird("thunderbird.csv").getFriends()
